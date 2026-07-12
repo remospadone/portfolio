@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About — Remo Spadone</title>
+  <meta name="description" content="Chi e Remo Spadone — graphic designer e creative coder. Strumenti, formazione e passione per il design visivo.">
+  <meta property="og:title" content="About — Remo Spadone">
+  <meta property="og:description" content="Chi e Remo Spadone — graphic designer e creative coder. Strumenti, formazione e passione per il design visivo.">
+  <meta property="og:type" content="website">
+  <link rel="canonical" href="https://remospadone.com/about.html">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="cursor"></div>
+  <div id="cursor-dot"></div>
+
+  <div class="mobile-overlay" id="mobile-overlay"></div>
+  <nav class="navbar">
+    <a href="index.html" class="logo"><img src="img/logo.svg" alt="RS" class="logo-img"></a>
+    <ul class="nav-links" id="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="works.html">Lavori</a></li>
+      <li><a href="about.html" class="active">About</a></li>
+      <li><a href="contacts.html">Contatti</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="Menu" aria-expanded="false">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </nav>
+
+  <div id="about-sketch" class="sketch-container"></div>
+
+  <main>
+    <section class="about-section">
+      <div class="container">
+        <div class="about-grid">
+          <div class="about-photo" style="display:flex;justify-content:center">
+            <div class="avatar-frame">
+              <img src="img/foto-remo.webp" alt="Remo Spadone" class="avatar-img" style="object-fit:contain" loading="lazy" onerror="this.style.display='none'">
+              <div class="avatar"></div>
+              <div class="avatar-ring"></div>
+            </div>
+          </div>
+          <div class="about-bio">
+            <h1>Remo Spadone</h1>
+            <p class="tagline">Graphic Designer</p>
+            <p>Ciao! Sono Remo, ho 23 anni e vivo ad Andria. Mi definisco una persona solare, che ama stare a contatto con la gente, motivo per cui credo molto nel lavoro in team.</p>
+            <p>Mi piace la grafica a 360&deg;: dalla grafica pubblicitaria al video editing, dalla prototipazione web al creative coding. Ultimamente sto approfondendo l'arte generativa con p5.js e le installazioni interattive, un mondo che sta cambiando il mio modo di vedere il design.</p>
+            <p>Il mio obiettivo è unire la solidità del graphic design tradizionale con le possibilit&agrave; espressive del codice, creando esperienze visive che emozionano e coinvolgono.</p>
+            <div class="tools-list">
+              <span class="tool-tag">Illustrator</span>
+              <span class="tool-tag">Photoshop</span>
+              <span class="tool-tag">InDesign</span>
+              <span class="tool-tag">Premiere Pro</span>
+              <span class="tool-tag">After Effects</span>
+              <span class="tool-tag">Figma</span>
+              <span class="tool-tag">Creative Coding</span>
+              <span class="tool-tag">HTML/CSS</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <a href="index.html" class="logo"><img src="img/logo.svg" alt="RS" class="logo-img"></a>
+      <div class="footer-links">
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="cookie.html">Cookie Policy</a>
+      </div>
+      <p>&copy; 2026 Remo Spadone</p>
+    </div>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js" defer></script>
+  <script src="js/main.js" defer></script>
+  <script src="js/about-sketch.js" defer></script>
+  <script src="js/cookie-banner.js" defer></script>
+</body>
+</html>

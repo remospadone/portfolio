@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tool di generazione Poster — Remo Spadone</title>
+  <meta name="description" content="Tool interattivo di generazione poster con SVG, animazioni e esportazione. Creative coding con HTML e CSS.">
+  <meta property="og:title" content="Tool di generazione Poster — Remo Spadone">
+  <meta property="og:description" content="Tool interattivo di generazione poster con SVG, animazioni e esportazione. Creative coding con HTML e CSS.">
+  <meta property="og:type" content="article">
+  <link rel="canonical" href="https://remospadone.com/works/work-2.html">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .demo-wrapper {
+      width: 100%;
+      height: 80vh;
+      min-height: 500px;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 60px;
+      position: relative;
+      background: #000;
+    }
+    .demo-wrapper iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    .demo-hint {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      margin: -48px 0 60px;
+      letter-spacing: 0.05em;
+    }
+    .demo-hint kbd {
+      display: inline-block;
+      padding: 2px 8px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 4px;
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      color: var(--text);
+    }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 60px;
+    }
+    .feature-card {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.05);
+      padding: 28px 20px;
+      text-align: center;
+      transition: all 0.4s;
+    }
+    .feature-card:hover {
+      border-color: var(--cyan);
+      transform: translateY(-6px);
+      box-shadow: var(--glow-cyan);
+    }
+    .feature-icon {
+      font-size: 2rem;
+      margin-bottom: 12px;
+      display: block;
+    }
+    .feature-card h4 {
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      margin-bottom: 8px;
+      letter-spacing: 0.05em;
+    }
+    .feature-card p {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 60px;
+    }
+    .gallery-item {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.05);
+      overflow: hidden;
+      transition: all 0.4s;
+      cursor: none;
+    }
+    .gallery-item:hover {
+      border-color: var(--cyan);
+      transform: scale(1.03);
+      box-shadow: var(--glow-cyan);
+    }
+    .gallery-item svg {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    .gallery-caption {
+      padding: 10px 12px;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      text-align: center;
+      letter-spacing: 0.05em;
+      border-top: 1px solid rgba(255,255,255,0.04);
+    }
+    .tech-stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 60px;
+    }
+    .tech-tag {
+      padding: 8px 20px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      letter-spacing: 0.05em;
+      transition: all 0.3s;
+      cursor: none;
+    }
+    .tech-tag:hover {
+      border-color: var(--magenta);
+      color: var(--magenta);
+      box-shadow: var(--glow-magenta);
+    }
+    @media (max-width: 968px) {
+      .feature-grid { grid-template-columns: repeat(2, 1fr); }
+      .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 640px) {
+      .demo-wrapper { height: 60vh; min-height: 300px; border-radius: 8px; margin-bottom: 40px; }
+      .feature-grid { grid-template-columns: 1fr; gap: 10px; }
+      .gallery-grid { grid-template-columns: 1fr; max-width: 100%; }
+      .demo-hint { font-size: 0.78rem; margin: -32px 0 40px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="cursor"></div>
+  <div id="cursor-dot"></div>
+
+  <div class="mobile-overlay" id="mobile-overlay"></div>
+  <nav class="navbar">
+    <a href="../index.html" class="logo"><img src="../img/logo.svg" alt="RS" class="logo-img"></a>
+    <ul class="nav-links" id="nav-links">
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="../works.html" class="active">Lavori</a></li>
+      <li><a href="../about.html">About</a></li>
+      <li><a href="../contacts.html">Contatti</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="Menu" aria-expanded="false">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </nav>
+
+  <div id="work-detail-sketch" class="sketch-container" data-color="230,240,255,0,200,255"></div>
+
+  <main>
+    <section class="work-detail-section">
+      <div class="container">
+        <a href="../works.html" class="work-back">&#8592; Torna ai lavori</a>
+
+        <div class="work-detail-header">
+          <div>
+            <p class="category">Creative Coding</p>
+            <h1>Tool di generazione Poster</h1>
+          </div>
+          <div class="work-detail-meta">
+            <div class="meta-item"><h4>Anno</h4><p>2026</p></div>
+            <div class="meta-item"><h4>Strumenti</h4><p>AI, Illustrator, HTML, CSS</p></div>
+          </div>
+        </div>
+
+        <div class="work-description">
+          <p>Un generatore di poster interattivo. L'utente può manipolare in tempo reale ogni elemento del poster — testi, cerchi, colore, formato — ottenendo composizioni uniche. Il progetto esplora il confine tra strumento di design e opera generativa, mettendo la potenza della grafica vettoriale direttamente nelle mani dell'utente.</p>
+          <p>Ogni poster è un SVG puro: vettori, testo e blend mode si combinano per creare un linguaggio visivo essenziale ma d'impatto. Con un pulsante si esporta il PNG o si registra un video dell'animazione.</p>
+        </div>
+
+        <h2 class="section-title">Provalo ora</h2>
+        <div class="demo-wrapper">
+          <iframe src="poster-tool.html" title="Poster Design - Generatore Interattivo" loading="lazy"></iframe>
+        </div>
+        <p class="demo-hint">Trascina i cerchi &middot; Modifica i testi &middot; Scegli il colore dal pannello &middot; <kbd>SPACE</kbd> per randomizzare</p>
+
+        <h2 class="section-title">Cosa può fare</h2>
+        <div class="feature-grid">
+          <div class="feature-card">
+            <span class="feature-icon">Aa</span>
+            <h4>Testi editabili</h4>
+            <p>Ogni elemento testuale è modificabile in tempo reale.</p>
+          </div>
+          <div class="feature-card">
+            <span class="feature-icon">&#9711;</span>
+            <h4>Cerchi interattivi</h4>
+            <p>Due cerchi trascinabili con <span style="color:var(--cyan)">mix-blend-mode: difference</span> per comporre il layout.</p>
+          </div>
+          <div class="feature-card">
+            <span class="feature-icon" style="background:linear-gradient(90deg,red,orange,yellow,green,blue,indigo,violet,red);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-size:200% 200%;animation:gradient-shift 3s ease infinite">&#9670;</span>
+            <h4>Colore dinamico</h4>
+            <p>Scegli un colore dalla palette o attiva l'animazione arcobaleno per un effetto cromatico continuo.</p>
+          </div>
+          <div class="feature-card">
+            <span class="feature-icon">&#9654;</span>
+            <h4>Animazione</h4>
+            <p>I cerchi si muovono con pattern organici, il colore può scorrere in modalità arcobaleno.</p>
+          </div>
+          <div class="feature-card">
+            <span class="feature-icon">&#9641;</span>
+            <h4>Formati multipli</h4>
+            <p>Da A3 a 70×100 cm, da 1080×1350 a 1080×1920 px. Ogni elemento si adatta proporzionalmente.</p>
+          </div>
+          <div class="feature-card">
+            <span class="feature-icon">&#8681;</span>
+            <h4>Esporta PNG</h4>
+            <p>Scarica il poster come PNG ad alta risoluzione, perfetto per stampa o social.</p>
+          </div>
+          <div class="feature-card">
+            <span class="feature-icon">&#9678;</span>
+            <h4>Registra video</h4>
+            <p>Crea un video del poster animato, scegliendo la durata tra 5, 10 e 15 secondi.</p>
+          </div>
+          <div class="feature-card">
+            <span class="feature-icon" style="font-style:italic;font-weight:700">Tt</span>
+            <h4>Tipografia</h4>
+            <p>Font Druk Condensed Super in peso Bold e Italic, con larghezza regolabile via slider.</p>
+          </div>
+        </div>
+
+        <div class="work-nav">
+          <a href="work-1.html">&#8592;<span class="nav-text"> Precedente</span></a>
+          <a href="../works.html">Tutti i lavori</a>
+          <a href="work-3.html"><span class="nav-text">Successivo </span>&#8594;</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <a href="../index.html" class="logo"><img src="../img/logo.svg" alt="RS" class="logo-img"></a>
+      <div class="footer-links">
+        <a href="../privacy.html">Privacy Policy</a>
+        <a href="../cookie.html">Cookie Policy</a>
+      </div>
+      <p>&copy; 2026 Remo Spadone</p>
+    </div>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js" defer></script>
+  <script src="../js/main.js" defer></script>
+  <script src="../js/work-detail-sketch.js" defer></script>
+  <script src="../js/cookie-banner.js" defer></script>
+</body>
+</html>

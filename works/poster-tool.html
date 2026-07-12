@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poster Interattivo - Generatore</title>
+    <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
+
+        @font-face {
+            font-family: 'DrukCondTrial-Super';
+            src: url('https://remo1112.github.io/poster-design/DrukCond-Super-Trial.otf') format('opentype');
+            font-weight: 900;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'DrukCondTrial-SuperItalic';
+            src: url('https://remo1112.github.io/poster-design/DrukCond-SuperItalic-Trial.otf') format('opentype');
+            font-weight: 900;
+            font-style: italic;
+        }
+
+        body, html {
+            margin: 0; padding: 0; width: 100vw; height: 100vh; height: 100dvh;
+            background-color: black; display: flex; justify-content: center;
+            align-items: center; overflow: hidden; font-family: sans-serif;
+        }
+        #svg-container {
+            width: 100%; height: 100%; display: flex; justify-content: center;
+            align-items: center; padding: 20px;
+        }
+        #svg-container svg {
+            width: 100%; height: 100%; max-width: 100vw; max-height: 100vh; max-height: 100dvh;
+        }
+        #btn-toggle {
+            position: fixed; top: 12px; left: 12px; z-index: 200;
+            background: rgba(255,255,255,0.15); backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.25); color: white; font-size: 22px;
+            width: 44px; height: 44px; border-radius: 10px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s, transform 0.1s; line-height: 1;
+        }
+        #btn-toggle:hover { background: rgba(255,255,255,0.25); }
+        #btn-toggle:active { transform: scale(0.92); }
+
+        #pannello-controllo {
+            position: fixed; top: 66px; left: 12px;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(16px);
+            padding: 18px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.15);
+            color: white; z-index: 100; display: flex; flex-direction: column; gap: 12px;
+            width: 260px; max-height: calc(100vh - 80px); max-height: calc(100dvh - 80px);
+            overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        #pannello-controllo.pannello-nascosto { transform: translateX(-120%); opacity: 0; pointer-events: none; }
+        #pannello-controllo input {
+            background: transparent; border: 1px solid rgba(255,255,255,0.3);
+            color: white; padding: 8px; font-size: 14px; border-radius: 6px; width: 100%; outline: none;
+        }
+        #pannello-controllo input:focus { border-color: rgba(255,255,255,0.6); }
+        #pannello-controllo input[type="color"] { height: 40px; padding: 0; border: none; border-radius: 6px; background: none; cursor: pointer; }
+        #pannello-controllo input[type="range"] { border: none; padding: 0; height: 4px; }
+        #pannello-controllo label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7; display: block; margin-bottom: 4px; }
+        #btn-scarica, #btn-animazione, #btn-record {
+            background-color: #ffffff; color: #000000; border: none; padding: 10px 15px;
+            font-size: 13px; font-weight: bold; text-transform: uppercase; border-radius: 6px;
+            cursor: pointer; transition: background-color 0.2s, transform 0.1s; margin-top: 8px;
+        }
+        #btn-animazione { margin-top: 0; padding: 6px 12px; font-size: 13px; min-width: 60px; flex-shrink: 0; }
+        #btn-record { margin-top: 0; padding: 6px 12px; font-size: 13px; flex-shrink: 0; }
+        #btn-scarica:hover, #btn-animazione:hover, #btn-record:hover { background-color: #dddddd; }
+        #btn-scarica:active, #btn-animazione:active, #btn-record:active { transform: scale(0.95); }
+        #btn-record:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .toggle-opt { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.4; transition: opacity 0.2s; cursor: default; }
+        .toggle-opt.active { opacity: 0.9; }
+
+        .toggle-switch { position: relative; display: inline-block; width: 36px; height: 20px; flex-shrink: 0; cursor: pointer; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+        .toggle-slider { position: absolute; inset: 0; background: rgba(255,255,255,0.15); border-radius: 20px; border: 1px solid rgba(255,255,255,0.15); transition: background 0.25s; }
+        .toggle-slider::before { content: ''; position: absolute; width: 14px; height: 14px; left: 2px; bottom: 2px; background: white; border-radius: 50%; transition: transform 0.25s; }
+        .toggle-switch input:checked + .toggle-slider { background: rgba(255,255,255,0.3); }
+        .toggle-switch input:checked + .toggle-slider::before { transform: translateX(16px); }
+
+        #select-durata, #select-formato { background: transparent; border: 1px solid rgba(255,255,255,0.3); color: white; padding: 6px 8px; border-radius: 6px; font-size: 13px; outline: none; cursor: pointer; width: 100%; }
+        #select-durata option, #select-formato option { background: #222; color: white; }
+
+        circle { cursor: grab; touch-action: none; pointer-events: all; }
+        circle:active { cursor: grabbing; }
+
+        .hint { font-size: 10px; opacity: 0.45; line-height: 1.4; }
+
+        @media (max-width: 768px) {
+            #pannello-controllo { width: calc(100vw - 24px); max-width: 320px; top: 66px; left: 12px; padding: 14px; gap: 10px; }
+            #pannello-controllo input { font-size: 13px; padding: 7px; }
+            #pannello-controllo input[type="color"] { height: 36px; }
+            #btn-toggle { top: 10px; left: 10px; width: 40px; height: 40px; font-size: 20px; }
+        }
+        @media (max-width: 480px) {
+            #pannello-controllo { width: calc(100vw - 16px); max-width: none; top: 60px; left: 8px; padding: 12px; gap: 8px; max-height: calc(100vh - 70px); max-height: calc(100dvh - 70px); }
+            #pannello-controllo input { font-size: 12px; padding: 6px; }
+            #pannello-controllo input[type="color"] { height: 32px; }
+            #pannello-controllo label { font-size: 10px; }
+            #btn-toggle { top: 8px; left: 8px; width: 36px; height: 36px; font-size: 18px; }
+            #btn-scarica, #btn-animazione, #btn-record { font-size: 12px; padding: 8px 12px; }
+        }
+    </style>
+</head>
+<body>
+
+    <button id="btn-toggle">☰</button>
+
+    <div id="pannello-controllo">
+        <div><label>Top Text</label><input type="text" id="input-testo-alto" value="TYPE HERE"></div>
+        <div><label>Large Word 1</label><input type="text" id="input-testo-grande-1" value="TYPE"></div>
+        <div><label>Large Word 2</label><input type="text" id="input-testo-grande-2" value="HERE"></div>
+        <div><label>Bottom Text</label><input type="text" id="input-testo-basso" value="TYPE HERE"></div>
+        <div><label>Color</label><input type="color" id="input-colore" value="#ffffff"></div>
+        <div><label>Large Text Width</label><input type="range" id="slider-larghezza-grande" min="0.1" max="5" step="0.01" value="1" style="width:100%"></div>
+        <div><label>Small Text Width</label><input type="range" id="slider-larghezza-piccolo" min="0.1" max="5" step="0.01" value="1" style="width:100%"></div>
+        <div style="border-top:1px solid rgba(255,255,255,0.1)"></div>
+        <div>
+            <label>Animation</label>
+            <div style="display:flex;gap:8px;align-items:center">
+                <button id="btn-animazione">▶</button>
+                <input type="range" id="slider-velocita" min="0.1" max="5" step="0.1" value="1" style="flex:1">
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;margin-top:6px">
+                <span id="lbl-rainbow" class="toggle-opt active">Rainbow</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="chk-colore-fisso">
+                    <span class="toggle-slider"></span>
+                </label>
+                <span id="lbl-fixed" class="toggle-opt">Color</span>
+            </div>
+        </div>
+        <div style="border-top:1px solid rgba(255,255,255,0.1)"></div>
+        <div>
+            <label>Format</label>
+            <select id="select-formato">
+                <option value="70x100">70×100cm</option>
+                <option value="A3" selected>A3</option>
+                <option value="A4">A4</option>
+                <option value="A5">A5</option>
+                <option value="1080x1350">1080×1350px</option>
+                <option value="1080x1920">1080×1920px</option>
+            </select>
+        </div>
+        <div style="border-top:1px solid rgba(255,255,255,0.1)"></div>
+        <div>
+            <label>Video</label>
+            <div style="display:flex;gap:6px;align-items:center">
+                <select id="select-durata">
+                    <option value="5">5 sec</option>
+                    <option value="10" selected>10 sec</option>
+                    <option value="15">15 sec</option>
+                </select>
+                <button id="btn-record">🔴</button>
+            </div>
+        </div>
+        <button id="btn-scarica">Download Poster PNG</button>
+        <div class="hint">Usa il color picker per cambiare colore</div>
+    </div>
+
+    <div id="svg-container">
+        <svg id="poster-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 841.89 1190.55">
+            <defs>
+                <style>
+                .cls-2, .cls-3, .cls-4 { fill: #fff; mix-blend-mode: difference; transition: fill 0.1s ease; }
+                text { user-select: none; -webkit-user-select: none; pointer-events: none; }
+                .cls-3 { font-family: DrukCondTrial-Super, 'Druk Cond Trial', 'Impact', sans-serif; font-size: 36px; letter-spacing: 2px; }
+                .cls-6 { isolation: isolate; }
+                .cls-4 { font-family: DrukCondTrial-SuperItalic, 'Druk Cond Trial', 'Impact', sans-serif; font-size: 654.11px; font-style: italic; font-weight: 900; text-anchor: middle; }
+                </style>
+            </defs>
+            <g class="cls-6">
+                <g id="_2" data-name="2">
+                    <rect x="0" y="0" width="841.89" height="1190.55" fill="#000000"/>
+                    <g id="guide-formato" opacity="0.4" pointer-events="none">
+                        <rect class="g-bordo" x="0" y="0" width="841.89" height="1190.55" fill="none" stroke="white" stroke-width="2" stroke-dasharray="8 4"/>
+                        <rect class="g-margine" x="56.69" y="56.69" width="728.51" height="1077.17" fill="none" stroke="white" stroke-width="1" stroke-dasharray="4 4"/>
+                    </g>
+                    <circle class="cls-2" cx="420.94" cy="871.65" r="392.6"/>
+                    <circle class="cls-2" cx="420.94" cy="349.27" r="392.6"/>
+                    <text id="svg-testo-alto" class="cls-3" text-anchor="start" transform="translate(28.35 55.15)">TYPE HERE</text>
+                    <text id="svg-testo-basso" class="cls-3" text-anchor="end" transform="translate(813.54 1162.2)">TYPE HERE</text>
+                    <text id="svg-testo-grande-1" class="cls-4" transform="translate(420.94 576.3)">TYPE</text>
+                    <text id="svg-testo-grande-2" class="cls-4" transform="translate(420.94 1096.2)">HERE</text>
+                </g>
+            </g>
+        </svg>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // --- 0. PRE-CARICA FONT PER EXPORT ---
+            (async () => {
+                const fontEntries = [
+                    ['DrukCondTrial-Super', 'https://remo1112.github.io/poster-design/DrukCond-Super-Trial.otf', 'normal'],
+                    ['DrukCondTrial-SuperItalic', 'https://remo1112.github.io/poster-design/DrukCond-SuperItalic-Trial.otf', 'italic']
+                ];
+                let fontCss = '';
+                for (const [name, path, style] of fontEntries) {
+                    try {
+                        const res = await fetch(path);
+                        const blob = await res.blob();
+                        const dataUrl = await new Promise(r => { const reader = new FileReader(); reader.onloadend = () => r(reader.result); reader.readAsDataURL(blob); });
+                        fontCss += `@font-face{font-family:'${name}';src:url(${dataUrl}) format('opentype');font-weight:900;font-style:${style}}`;
+                    } catch (e) {}
+                }
+                if (fontCss) {
+                    const styleEl = document.querySelector('#poster-svg defs style');
+                    if (styleEl) styleEl.textContent = fontCss + styleEl.textContent;
+                }
+            })();
+
+            // --- 1. GESTIONE DEI TESTI EDITABILI ---
+            const inputAlto = document.getElementById('input-testo-alto');
+            const inputBasso = document.getElementById('input-testo-basso');
+            const inputGrande1 = document.getElementById('input-testo-grande-1');
+            const inputGrande2 = document.getElementById('input-testo-grande-2');
+            const svgTestoAlto = document.getElementById('svg-testo-alto');
+            const svgTestoBasso = document.getElementById('svg-testo-basso');
+            const svgTestoGrande1 = document.getElementById('svg-testo-grande-1');
+            const svgTestoGrande2 = document.getElementById('svg-testo-grande-2');
+
+            inputAlto.addEventListener('input', function() { svgTestoAlto.textContent = this.value; });
+            inputBasso.addEventListener('input', function() { svgTestoBasso.textContent = this.value; });
+            inputGrande1.addEventListener('input', function() { svgTestoGrande1.textContent = this.value; });
+            inputGrande2.addEventListener('input', function() { svgTestoGrande2.textContent = this.value; });
+
+            // --- 2. GESTIONE DEL DRAG DEI CERCHI ---
+            interact('circle').draggable({
+                inertia: true,
+                listeners: {
+                    move (event) {
+                        const target = event.target;
+                        const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+                        const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+                        target.style.transform = `translate(${x}px, ${y}px)`;
+                        target.setAttribute('data-x', x);
+                        target.setAttribute('data-y', y);
+                    }
+                }
+            });
+
+            // --- 3. GESTIONE COLORE DA TAVOLOZZA ---
+            const elementiDaColorare = document.querySelectorAll('.cls-2, .cls-3, .cls-4');
+            const inputColore = document.getElementById('input-colore');
+            inputColore.addEventListener('input', function() {
+                elementiDaColorare.forEach(el => { el.style.fill = this.value; });
+            });
+
+            // --- 4. GESTIONE LARGHEZZA LETTERE (scaleX) ---
+            let scalaXGrande = 1;
+            let scalaXPiccolo = 1;
+            const sliderLarghezzaGrande = document.getElementById('slider-larghezza-grande');
+            const sliderLarghezzaPiccolo = document.getElementById('slider-larghezza-piccolo');
+
+            function aggiornaTrasformTesto() {
+                [svgTestoAlto, svgTestoBasso].forEach(el => {
+                    const m = el.getAttribute('transform').match(/translate\(([\d.]+)\s+([\d.]+)\)/);
+                    if (m) el.style.transform = `translate(${m[1]}px, ${m[2]}px) scaleX(${scalaXPiccolo})`;
+                });
+                [svgTestoGrande1, svgTestoGrande2].forEach(el => {
+                    const m = el.getAttribute('transform').match(/translate\(([\d.]+)\s+([\d.]+)\)/);
+                    if (m) el.style.transform = `translate(${m[1]}px, ${m[2]}px) scaleX(${scalaXGrande})`;
+                });
+            }
+
+            sliderLarghezzaGrande.addEventListener('input', function() { scalaXGrande = parseFloat(this.value); aggiornaTrasformTesto(); });
+            sliderLarghezzaPiccolo.addEventListener('input', function() { scalaXPiccolo = parseFloat(this.value); aggiornaTrasformTesto(); });
+
+            // --- 5. GESTIONE CAMBIO FORMATO ---
+            const FORMATI = {
+                '70x100':   { w: 700,    h: 1000   },
+                'A3':       { w: 841.89, h: 1190.55 },
+                'A4':       { w: 595.28, h: 841.89  },
+                'A5':       { w: 420.94, h: 595.28  },
+                '1080x1350':{ w: 1080,   h: 1350    },
+                '1080x1920':{ w: 1080,   h: 1920    }
+            };
+            const BASE_W = 841.89;
+            const BASE_H = 1190.55;
+            const BASE_CLS3 = 36;
+            const BASE_CLS4 = 654.11;
+            let formatoCorrente = { w: BASE_W, h: BASE_H };
+            const selectFormato = document.getElementById('select-formato');
+            const svgElForm = document.getElementById('poster-svg');
+
+            const BASE_EL = (() => {
+                const cerchi = svgElForm.querySelectorAll('.cls-2');
+                return {
+                    cerchi: Array.from(cerchi).map(c => ({ cx: parseFloat(c.getAttribute('cx')), cy: parseFloat(c.getAttribute('cy')), r: parseFloat(c.getAttribute('r')) })),
+                    alto: { x: 28.35, y: 55.15 },
+                    basso: { x: 813.54, y: 1162.2 },
+                    grande1: { x: 420.94, y: 576.3 },
+                    grande2: { x: 420.94, y: 1096.2 }
+                };
+            })();
+
+            function cambiaFormato(newW, newH) {
+                const sx = newW / BASE_W;
+                const sy = newH / BASE_H;
+                const sf = Math.min(sx, sy);
+                formatoCorrente = { w: newW, h: newH };
+                svgElForm.setAttribute('viewBox', `0 0 ${newW} ${newH}`);
+                svgElForm.querySelector('rect').setAttribute('width', newW);
+                svgElForm.querySelector('rect').setAttribute('height', newH);
+                const cerchi = svgElForm.querySelectorAll('.cls-2');
+                cerchi.forEach((c, i) => {
+                    c.setAttribute('cx', BASE_EL.cerchi[i].cx * sx);
+                    c.setAttribute('cy', BASE_EL.cerchi[i].cy * sy);
+                    c.setAttribute('r', BASE_EL.cerchi[i].r * sf);
+                    c.style.transform = 'none';
+                    c.removeAttribute('data-x');
+                    c.removeAttribute('data-y');
+                });
+                function setPos(el, bx, by) { el.setAttribute('transform', `translate(${bx * sx} ${by * sy})`); }
+                function setPosFont(el, bx, by, baseFs) { el.setAttribute('transform', `translate(${bx * sx} ${by * sy})`); el.style.fontSize = `${baseFs * sf}px`; }
+                setPosFont(svgTestoAlto, BASE_EL.alto.x, BASE_EL.alto.y, BASE_CLS3);
+                setPosFont(svgTestoBasso, BASE_EL.basso.x, BASE_EL.basso.y, BASE_CLS3);
+                setPosFont(svgTestoGrande1, BASE_EL.grande1.x, BASE_EL.grande1.y, BASE_CLS4);
+                setPosFont(svgTestoGrande2, BASE_EL.grande2.x, BASE_EL.grande2.y, BASE_CLS4);
+                const marg = 56.69 * sf;
+                const gBordo = svgElForm.querySelector('.g-bordo');
+                const gMargine = svgElForm.querySelector('.g-margine');
+                if (gBordo) { gBordo.setAttribute('width', newW); gBordo.setAttribute('height', newH); }
+                if (gMargine) { gMargine.setAttribute('x', marg); gMargine.setAttribute('y', marg); gMargine.setAttribute('width', newW - marg * 2); gMargine.setAttribute('height', newH - marg * 2); }
+                aggiornaTrasformTesto();
+            }
+
+            selectFormato.addEventListener('change', function() {
+                const fmt = FORMATI[this.value];
+                if (fmt) cambiaFormato(fmt.w, fmt.h);
+            });
+            aggiornaTrasformTesto();
+
+            // --- 6. GESTIONE ANIMAZIONE ---
+            let animazioneAttiva = false;
+            let animazioneId = null;
+            let hueAngolo = 0;
+            const OVERFLOW = 80;
+            const cerchiAnim = [
+                { tx: 0, ty: 0, vel: 2.5, wobble: 0 },
+                { tx: 0, ty: 0, vel: 2.0, wobble: 0 }
+            ];
+
+            function nuovoTarget(i, vbW, vbH) {
+                cerchiAnim[i].tx = Math.random() * (vbW - OVERFLOW * 2) + OVERFLOW;
+                cerchiAnim[i].ty = Math.random() * (vbH - OVERFLOW * 2) + OVERFLOW;
+            }
+
+            const btnAnim = document.getElementById('btn-animazione');
+            const sliderVel = document.getElementById('slider-velocita');
+
+            function anima() {
+                if (!animazioneAttiva) return;
+                try {
+                    const cerchi = document.querySelectorAll('.cls-2');
+                    const vbW = formatoCorrente.w;
+                    const vbH = formatoCorrente.h;
+                    const speed = parseFloat(sliderVel.value);
+                    cerchi.forEach((circle, i) => {
+                        let cx = parseFloat(circle.getAttribute('cx'));
+                        let cy = parseFloat(circle.getAttribute('cy'));
+                        const dx = cerchiAnim[i].tx - cx;
+                        const dy = cerchiAnim[i].ty - cy;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < 30) nuovoTarget(i, vbW, vbH);
+                        let angolo = Math.atan2(dy, dx);
+                        cerchiAnim[i].wobble += (Math.random() - 0.5) * 0.15 * speed;
+                        angolo += Math.sin(cerchiAnim[i].wobble) * 0.3;
+                        const vx = Math.cos(angolo) * cerchiAnim[i].vel * speed;
+                        const vy = Math.sin(angolo) * cerchiAnim[i].vel * speed;
+                        cx += vx; cy += vy;
+                        cx = Math.max(-OVERFLOW, Math.min(vbW + OVERFLOW, cx));
+                        cy = Math.max(-OVERFLOW, Math.min(vbH + OVERFLOW, cy));
+                        circle.setAttribute('cx', cx);
+                        circle.setAttribute('cy', cy);
+                        circle.style.transform = 'none';
+                        circle.removeAttribute('data-x');
+                        circle.removeAttribute('data-y');
+                    });
+                    if (document.getElementById('chk-colore-fisso').checked) {
+                        const coloreFisso = document.getElementById('input-colore').value;
+                        elementiDaColorare.forEach(el => el.style.fill = coloreFisso);
+                    } else {
+                        hueAngolo = (hueAngolo + 0.5 * speed) % 360;
+                        const colore = `hsl(${hueAngolo}, 100%, 50%)`;
+                        elementiDaColorare.forEach(el => el.style.fill = colore);
+                    }
+                    animazioneId = requestAnimationFrame(anima);
+                } catch (e) {
+                    animazioneAttiva = false;
+                    btnAnim.textContent = '▶';
+                }
+            }
+
+            function avviaPrimiTarget() { const vbW = formatoCorrente.w; const vbH = formatoCorrente.h; cerchiAnim.forEach((_, i) => nuovoTarget(i, vbW, vbH)); }
+            avviaPrimiTarget();
+
+            document.getElementById('chk-colore-fisso').addEventListener('change', function() {
+                document.getElementById('lbl-rainbow').classList.toggle('active', !this.checked);
+                document.getElementById('lbl-fixed').classList.toggle('active', this.checked);
+            });
+
+            btnAnim.addEventListener('click', function() {
+                animazioneAttiva = !animazioneAttiva;
+                this.textContent = animazioneAttiva ? '⏸' : '▶';
+                if (animazioneAttiva) anima();
+                else cancelAnimationFrame(animazioneId);
+            });
+
+            // --- 7. POSIZIONAMENTO RANDOM CERCHI (SPACEBAR) ---
+            document.addEventListener('keydown', function(event) {
+                if (event.code === 'Space' && document.activeElement && document.activeElement.tagName !== 'INPUT') {
+                    event.preventDefault();
+                    const cerchi = document.querySelectorAll('.cls-2');
+                    const vbW = 841.89; const vbH = 1190.55; const pad = 50;
+                    cerchi.forEach(circle => {
+                        const cx = Math.random() * (vbW - pad * 2) + pad;
+                        const cy = Math.random() * (vbH - pad * 2) + pad;
+                        circle.setAttribute('cx', cx); circle.setAttribute('cy', cy);
+                        circle.style.transform = 'none'; circle.removeAttribute('data-x'); circle.removeAttribute('data-y');
+                    });
+                }
+            });
+
+            // --- 8. GESTIONE TOGGLE PANNELLO ---
+            const btnToggle = document.getElementById('btn-toggle');
+            const pannello = document.getElementById('pannello-controllo');
+
+            pannello.addEventListener('wheel', function(e) { e.stopPropagation(); });
+
+            function bloccaScrollEsterno(e) { if (!pannello.contains(e.target)) e.preventDefault(); }
+            function aggiornaBloccoScroll() {
+                const nascosto = pannello.classList.contains('pannello-nascosto');
+                if (nascosto) document.removeEventListener('touchmove', bloccaScrollEsterno, { passive: false });
+                else document.addEventListener('touchmove', bloccaScrollEsterno, { passive: false });
+            }
+
+            btnToggle.addEventListener('click', function() {
+                pannello.classList.toggle('pannello-nascosto');
+                btnToggle.textContent = pannello.classList.contains('pannello-nascosto') ? '✎' : '☰';
+                aggiornaBloccoScroll();
+            });
+
+            if (window.innerWidth <= 768) { pannello.classList.add('pannello-nascosto'); btnToggle.textContent = '✎'; }
+            aggiornaBloccoScroll();
+
+            // --- 9. GESTIONE REGISTRAZIONE VIDEO ---
+            const btnRecord = document.getElementById('btn-record');
+            const selectDurata = document.getElementById('select-durata');
+
+            btnRecord.addEventListener('click', function() {
+                const durata = parseInt(selectDurata.value);
+                const durataMs = durata * 1000;
+                const canvas = document.createElement('canvas');
+                canvas.width = formatoCorrente.w;
+                canvas.height = formatoCorrente.h;
+                const ctx = canvas.getContext('2d');
+                const serializer = new XMLSerializer();
+                const svgEl = document.getElementById('poster-svg');
+                const mimeTypes = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'];
+                let selectedMime = mimeTypes.find(m => MediaRecorder.isTypeSupported(m)) || 'video/webm';
+                const stream = canvas.captureStream(30);
+                const recorder = new MediaRecorder(stream, { mimeType: selectedMime });
+                const chunks = [];
+                recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+                recorder.onstop = () => {
+                    const blob = new Blob(chunks, { type: 'video/webm' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url; a.download = 'poster-animato.webm';
+                    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    btnRecord.disabled = false;
+                    btnRecord.textContent = '🔴 Registra';
+                };
+                recorder.start();
+                btnRecord.disabled = true;
+                btnRecord.textContent = '⏺ ' + durata + 's...';
+                if (!animazioneAttiva) { animazioneAttiva = true; btnAnim.textContent = '⏸'; anima(); }
+                const startTime = performance.now();
+                function catturaFrame() {
+                    const elapsed = performance.now() - startTime;
+                    if (elapsed >= durataMs) { recorder.stop(); return; }
+                    const svgStr = serializer.serializeToString(svgEl);
+                    const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+                    const url = URL.createObjectURL(blob);
+                    const img = new Image();
+                    img.onload = () => {
+                        ctx.fillStyle = 'black'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        ctx.drawImage(img, 0, 0); URL.revokeObjectURL(url);
+                        setTimeout(catturaFrame, 1000 / 30);
+                    };
+                    img.onerror = () => { URL.revokeObjectURL(url); setTimeout(catturaFrame, 1000 / 30); };
+                    img.src = url;
+                }
+                catturaFrame();
+            });
+
+            // --- 10. GESTIONE ESPORTAZIONE PNG ---
+            const btnScarica = document.getElementById('btn-scarica');
+            btnScarica.addEventListener('click', function() {
+                const svgElement = document.getElementById('poster-svg');
+                const svgClone = svgElement.cloneNode(true);
+                const guideGroup = svgClone.querySelector('#guide-formato');
+                if (guideGroup) guideGroup.remove();
+                const serializer = new XMLSerializer();
+                let svgString = serializer.serializeToString(svgClone);
+                const svgBlob = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"});
+                const DOMURL = window.URL || window.webkitURL || window;
+                const url = DOMURL.createObjectURL(svgBlob);
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = formatoCorrente.w; canvas.height = formatoCorrente.h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.fillStyle = "black"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0); DOMURL.revokeObjectURL(url);
+                    const imgURI = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream');
+                    const a = document.createElement('a');
+                    a.setAttribute('download', 'poster-generato.png');
+                    a.setAttribute('href', imgURI); a.setAttribute('target', '_blank');
+                    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                };
+                img.src = url;
+            });
+
+        });
+    </script>
+</body>
+</html>
