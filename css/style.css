@@ -283,11 +283,14 @@ a.logo {
 
 /* Button */
 .btn {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 14px 40px;
   font-family: var(--font-display);
   font-weight: 500;
   font-size: 0.9rem;
+  line-height: 1;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--bg);
@@ -1261,6 +1264,10 @@ a.logo {
     margin-bottom: 28px;
   }
 
+  .hero {
+    text-align: left;
+  }
+
   .btn {
     padding: 12px 28px;
     font-size: 0.8rem;
@@ -1575,6 +1582,10 @@ a.logo {
   .hero h1 {
     font-size: clamp(1.8rem, 10vw, 3rem);
     min-height: 0.8em;
+  }
+
+  .hero {
+    text-align: left;
   }
 
   .hero-subtitle {
