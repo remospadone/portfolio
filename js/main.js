@@ -79,8 +79,7 @@ if (!reducedMotion) {
     '.demo-wrapper',
     '.demo-hint',
     '.feature-card',
-    '.work-nav',
-    '.footer .container > *'
+    '.work-nav'
   ];
   const revealElements = document.querySelectorAll(revealSelectors.join(','));
   const siblingIndexes = new Map();
