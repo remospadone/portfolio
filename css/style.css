@@ -1822,6 +1822,7 @@ a.logo {
 .footer * {
   opacity: 1 !important;
   translate: none !important;
+  transform: none !important;
   filter: none !important;
   animation: none !important;
 }
@@ -1889,6 +1890,27 @@ a.logo {
   to {
     opacity: 1;
     translate: 0 0;
+    filter: blur(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .reveal-enabled .scroll-reveal {
+    translate: none;
+    transform: translate3d(0, 24px, 0);
+    filter: blur(3px);
+  }
+
+  .reveal-enabled .scroll-reveal.is-visible {
+    animation-name: scroll-reveal-mobile;
+    animation-duration: 650ms;
+  }
+}
+
+@keyframes scroll-reveal-mobile {
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
     filter: blur(0);
   }
 }

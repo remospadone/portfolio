@@ -59,6 +59,7 @@ const observer = new IntersectionObserver((entries) => {
 document.querySelectorAll('.skills-grid').forEach(el => observer.observe(el));
 
 if (!reducedMotion) {
+  const isMobileViewport = window.matchMedia('(max-width: 768px)').matches;
   const revealSelectors = [
     '.section-title',
     '.intro-grid > *',
@@ -98,7 +99,10 @@ if (!reducedMotion) {
       entry.target.classList.add('is-visible');
       revealObserver.unobserve(entry.target);
     });
-  }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+  }, {
+    threshold: isMobileViewport ? 0.04 : 0.12,
+    rootMargin: isMobileViewport ? '0px 0px 24px 0px' : '0px 0px -8% 0px'
+  });
 
   revealElements.forEach(element => revealObserver.observe(element));
 }
