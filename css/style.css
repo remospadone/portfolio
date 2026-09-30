@@ -1817,6 +1817,15 @@ a.logo {
   }
 }
 
+/* The footer must never inherit a scroll-reveal hidden state. */
+.footer,
+.footer * {
+  opacity: 1 !important;
+  translate: none !important;
+  filter: none !important;
+  animation: none !important;
+}
+
 /* ========================================
    RESPONSIVE — VERY SMALL (max-width: 360px)
    ======================================== */
