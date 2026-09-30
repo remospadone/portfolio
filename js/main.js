@@ -1,6 +1,7 @@
 const cursor = document.getElementById('cursor');
 const cursorDot = document.getElementById('cursor-dot');
 const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 if (!isTouchDevice && cursor && cursorDot) {
   let mouseX = 0, mouseY = 0;
@@ -40,10 +41,8 @@ if (!isTouchDevice && cursor && cursorDot) {
 
   animateCursor();
 
-  const hoverTargets = document.querySelectorAll('a, .btn, .work-card, .service-card, .skill-item, .social-link, .tool-tag, .contact-detail, .hamburger');
-  hoverTargets.forEach(el => {
-    el.addEventListener('mouseenter', () => cursor.classList.add('cursor-hover'));
-    el.addEventListener('mouseleave', () => cursor.classList.remove('cursor-hover'));
+  document.addEventListener('mouseover', (event) => {
+    cursor.classList.toggle('cursor-hover', Boolean(event.target.closest('a, button, .work-card, .service-card, .skill-item, .social-link, .tool-tag, .contact-detail')));
   });
 }
 
@@ -58,6 +57,17 @@ const observer = new IntersectionObserver((entries) => {
 }, { threshold: 0.3 });
 
 document.querySelectorAll('.skills-grid').forEach(el => observer.observe(el));
+
+const navbar = document.querySelector('.navbar');
+let lastScrollY = window.scrollY;
+
+if (navbar && !reducedMotion) {
+  window.addEventListener('scroll', () => {
+    const currentScrollY = window.scrollY;
+    navbar.classList.toggle('nav-hidden', currentScrollY > lastScrollY && currentScrollY > 160);
+    lastScrollY = currentScrollY;
+  }, { passive: true });
+}
 
 const hamburger = document.getElementById('hamburger');
 const navLinks = document.getElementById('nav-links');

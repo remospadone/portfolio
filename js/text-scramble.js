@@ -1,12 +1,11 @@
 const chars = '!<>-_\\/[]{}—=+*^?#________';
-const el = document.querySelector('.hero h1');
-const phrases = ['Remo Spadone', 'Graphic Designer', 'Creative Coder'];
+const el = document.querySelector('.scramble-text');
 
 class Scramble {
   constructor(el) {
     this.el = el;
-    this.text = phrases[0];
-    this.original = phrases[0];
+    this.text = el.textContent.trim();
+    this.original = this.text;
     this.queue = [];
     this.frame = 0;
     this.resolve = 0;
@@ -37,7 +36,7 @@ class Scramble {
     }
     this.el.textContent = output.join('');
     if (complete < this.text.length) {
-      this.frame += 0.5;
+      this.frame += 1;
       requestAnimationFrame(() => this.update());
     } else {
       this.el.classList.add('settled');
@@ -47,5 +46,10 @@ class Scramble {
 }
 
 window.addEventListener('load', () => {
+  if (!el) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    el.classList.add('settled');
+    return;
+  }
   new Scramble(el);
 });

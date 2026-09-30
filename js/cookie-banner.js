@@ -4,13 +4,14 @@
   if (localStorage.getItem(KEY)) return;
 
   var banner = document.createElement('div');
+  var prefix = window.location.pathname.indexOf('/works/') !== -1 ? '../' : '';
   banner.id = 'cookie-banner';
   banner.innerHTML =
     '<div class="cookie-banner-inner">' +
       '<p>Questo sito utilizza cookie tecnici per il corretto funzionamento. ' +
         'Per maggiori dettagli consulta la nostra ' +
-        '<a href="cookie.html">Cookie Policy</a> e la ' +
-        '<a href="privacy.html">Privacy Policy</a>.' +
+        '<a href="' + prefix + 'cookie.html">Cookie Policy</a> e la ' +
+        '<a href="' + prefix + 'privacy.html">Privacy Policy</a>.' +
       '</p>' +
       '<div class="cookie-banner-actions">' +
         '<button id="cookie-accept" class="btn cookie-btn">Accetta</button>' +

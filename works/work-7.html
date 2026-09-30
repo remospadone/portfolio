@@ -15,14 +15,20 @@
   <div id="cursor"></div>
   <div id="cursor-dot"></div>
 
+  <div class="mobile-overlay" id="mobile-overlay"></div>
   <nav class="navbar">
     <a href="../index.html" class="logo"><img src="../img/logo.svg" alt="RS" class="logo-img"></a>
-    <ul class="nav-links">
+    <ul class="nav-links" id="nav-links">
       <li><a href="../index.html">Home</a></li>
       <li><a href="../works.html" class="active">Lavori</a></li>
       <li><a href="../about.html">About</a></li>
       <li><a href="../contacts.html">Contatti</a></li>
     </ul>
+    <button class="hamburger" id="hamburger" aria-label="Menu" aria-expanded="false">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
   </nav>
 
   <div id="work-detail-sketch" class="sketch-container" data-color="255,204,0,255,180,0"></div>
@@ -50,12 +56,15 @@
           <p>La grazia è un cortometraggio realizzato nell'ambito di un progetto accademico presso l'Accademia di Belle Arti di Foggia. Il lavoro mette a confronto il superfluo e l'essenziale, sviluppando una riflessione critica sul concetto di bellezza generata dall'intervento umano, sia nei paesaggi sia nei corpi.</p>
         </div>
         <div class="work-video">
-          <iframe src="https://drive.google.com/file/d/190NqDxkWrtZy8NVvrOdWMMUJhubUwaQa/preview" allow="autoplay; encrypted-media" allowfullscreen loading="lazy" class="showcase-video"></iframe>
+          <video class="showcase-video" controls playsinline preload="metadata" poster="../img/work7/tre.webp">
+            <source src="../img/work7/la-grazia-web.mp4" type="video/mp4">
+            Il tuo browser non supporta la riproduzione video.
+          </video>
         </div>
         <div class="work-nav">
-          <a href="work-6.html">&#8592;</a>
+          <a href="work-6.html">&#8592;<span class="nav-text"> Precedente</span></a>
           <a href="../works.html">Tutti i lavori</a>
-          <a href="work-8.html">&#8594;</a>
+          <a href="work-8.html"><span class="nav-text">Successivo </span>&#8594;</a>
         </div>
       </div>
     </section>

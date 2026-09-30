@@ -1,1 +1,4 @@
 .git
+desktop.ini
+img/work7/*.mp4
+!img/work7/la-grazia-web.mp4
