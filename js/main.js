@@ -58,6 +58,52 @@ const observer = new IntersectionObserver((entries) => {
 
 document.querySelectorAll('.skills-grid').forEach(el => observer.observe(el));
 
+if (!reducedMotion) {
+  const revealSelectors = [
+    '.section-title',
+    '.intro-grid > *',
+    '.skill-item',
+    '.service-card',
+    '.works-header .container > *',
+    '.work-card',
+    '.about-grid > *',
+    '.contacts-grid > *',
+    '.contact-detail',
+    '.social-link',
+    '.legal-content > *',
+    '.work-back',
+    '.work-detail-header > *',
+    '.work-showcase',
+    '.work-description',
+    '.media-item',
+    '.demo-wrapper',
+    '.demo-hint',
+    '.feature-card',
+    '.work-nav',
+    '.footer .container > *'
+  ];
+  const revealElements = document.querySelectorAll(revealSelectors.join(','));
+  const siblingIndexes = new Map();
+
+  document.documentElement.classList.add('reveal-enabled');
+  revealElements.forEach(element => {
+    const index = siblingIndexes.get(element.parentElement) || 0;
+    element.classList.add('scroll-reveal');
+    element.style.setProperty('--reveal-delay', `${Math.min(index * 70, 350)}ms`);
+    siblingIndexes.set(element.parentElement, index + 1);
+  });
+
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('is-visible');
+      revealObserver.unobserve(entry.target);
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+
+  revealElements.forEach(element => revealObserver.observe(element));
+}
+
 const navbar = document.querySelector('.navbar');
 let lastScrollY = window.scrollY;
 
